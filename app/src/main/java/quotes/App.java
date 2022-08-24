@@ -3,12 +3,14 @@
  */
 package quotes;
 
+import com.google.gson.Gson;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        //proof of life
+        Gson gson = new Gson();
+        String jsonReturn = gson.toJson(1);
+        System.out.println(jsonReturn);
     }
 }
