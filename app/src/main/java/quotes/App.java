@@ -3,12 +3,68 @@
  */
 package quotes;
 
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
+
+
+    public static void main(String[] args) throws IOException {
+
+        String filePath = System.getProperty("user.dir");
+        System.out.println(filePath);
+        if(args.length > 0) {
+            System.out.println(quoteByAuthor(filePath, args[0]));
+            System.out.println(quoteByWord(filePath, args[0]));
+        } else {
+            System.out.println(randomQuote(filePath));
+        }
+
+    }
+    public static String randomQuote(String filePath) throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        Random rando = new Random();
+        int index = rando.nextInt(quotes.length);
+        Quotes q = quotes[index];
+        String authorText = "Author: " + q.getAuthor() + " Quote: " + q.getText();
+
+        return authorText;
     }
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+    public static String quoteByAuthor(String filePath, String author) throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        for(Quotes q : quotes){
+            if (q.getAuthor().contains(author)){
+                return "Author: " + q.getAuthor() + " Quote: " + q.getText();
+            }
+        }
+        return "Author not found.";
     }
+    public static String quoteByWord(String filePath, String word) throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        for(Quotes q : quotes){
+            if (q.getText().contains(word)){
+                return "Author: " + q.getAuthor() + " Quote: " + q.getText();
+            }
+        }
+        return "Word not found.";
+    }
+
 }
