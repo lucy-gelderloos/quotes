@@ -13,29 +13,41 @@ import java.util.Random;
 
 public class App {
 
+
     public static void main(String[] args) throws IOException {
 
-        Gson gson = new Gson();
         String filePath = System.getProperty("user.dir");
         System.out.println(filePath);
+        System.out.println(randomQuote(filePath));
+        System.out.println(quoteByAuthor(filePath, args[0]));
 
-
+    }
+    public static String randomQuote(String filePath) throws IOException {
         Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
                 "\\main" +
                 "\\resources\\recentquotes.json"));
-
-        //Reader reader = Files.newBufferedReader(Paths.get("C:\\msys64\\home" +
-                //"\\mnmas\\quotes\\app\\src\\main\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
         Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
-        System.out.println(quotes[0].getText());
-
-        // Random author & quote text generator
         Random rando = new Random();
         int index = rando.nextInt(quotes.length);
         Quotes q = quotes[index];
         String authorText = "Author: " + q.getAuthor() + " Quote: " + q.getText();
-        System.out.println(authorText);
 
-
+        return authorText;
     }
+
+    public static String quoteByAuthor(String filePath, String author) throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        for(Quotes q : quotes){
+            if (q.getAuthor().contains(author)){
+                return "Author: " + q.getAuthor() + " Quote: " + q.getText();
+            }
+        }
+        return "Author not found.";
+    }
+
 }
