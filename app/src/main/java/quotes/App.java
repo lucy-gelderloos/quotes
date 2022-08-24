@@ -18,8 +18,12 @@ public class App {
 
         String filePath = System.getProperty("user.dir");
         System.out.println(filePath);
-        System.out.println(randomQuote(filePath));
-        System.out.println(quoteByAuthor(filePath, args[0]));
+        if(args.length > 0) {
+            System.out.println(quoteByAuthor(filePath, args[0]));
+            System.out.println(quoteByWord(filePath, args[0]));
+        } else {
+            System.out.println(randomQuote(filePath));
+        }
 
     }
     public static String randomQuote(String filePath) throws IOException {
@@ -48,6 +52,19 @@ public class App {
             }
         }
         return "Author not found.";
+    }
+    public static String quoteByWord(String filePath, String word) throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+        Gson gson = new Gson();
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        for(Quotes q : quotes){
+            if (q.getText().contains(word)){
+                return "Author: " + q.getAuthor() + " Quote: " + q.getText();
+            }
+        }
+        return "Word not found.";
     }
 
 }
