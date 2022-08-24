@@ -5,12 +5,37 @@ package quotes;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
+
 public class App {
 
-    public static void main(String[] args) {
-        //proof of life
+    public static void main(String[] args) throws IOException {
+
         Gson gson = new Gson();
-        String jsonReturn = gson.toJson(1);
-        System.out.println(jsonReturn);
+        String filePath = System.getProperty("user.dir");
+        System.out.println(filePath);
+
+
+        Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json"));
+
+        //Reader reader = Files.newBufferedReader(Paths.get("C:\\msys64\\home" +
+                //"\\mnmas\\quotes\\app\\src\\main\\resources\\recentquotes.json"));
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
+        System.out.println(quotes[0].getText());
+
+        // Random author & quote text generator
+        Random rando = new Random();
+        int index = rando.nextInt(quotes.length);
+        Quotes q = quotes[index];
+        String authorText = "Author: " + q.getAuthor() + " Quote: " + q.getText();
+        System.out.println(authorText);
+
+
     }
 }
