@@ -5,13 +5,20 @@ package quotes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class App {
@@ -19,51 +26,62 @@ public class App {
 
     public static void main(String[] args) throws IOException {
 
-//        String filePath = System.getProperty("user.dir");
-//        System.out.println(filePath);
-//        if(args.length > 0) {
-//            System.out.println(quoteByAuthor(filePath, args[0]));
-//            System.out.println(quoteByWord(filePath, args[0]));
-//        } else {
-//            System.out.println(randomQuote(filePath));
-//        }
+        String filePath = System.getProperty("user.dir");
 
-        HttpURLConnection con = urlConnector();
-        String[] swQuote = UrlReaderParser(con);
-//        quoteWriter(swQuote);
-
+        if(args.length == 0 || args[0].equals("local-random")) {
+            System.out.println(randomQuote(filePath));
+        } else if(args[0].equals("internet-random")) {
+            HttpURLConnection con = urlConnector();
+            String[] swQuote = UrlReaderParser(con);
+            if(swQuote.length == 0){
+                System.out.println("The server did not respond.");
+                System.out.println(randomQuote(filePath));
+            } else { System.out.println(swQuote[0] + " - Ron Swanson");
+            swansonQuoteWriter(swQuote); }
+        } else if(args[0].equals("local-search")) {
+            System.out.println(quoteByAuthor(filePath, args[1]));
+            System.out.println(quoteByWord(filePath, args[1]));
+        } else {
+            System.out.println("Invalid search. Please enter \"local-random\", \"internet-random\", or \"local-search\"");
+        }
     }
 
     static Gson gson = null;
+
     public String getGreeting() {
         return "Hello World!";
     }
 
-//    private static void quoteWriter(StarWarsQuotes swQuote) throws IOException {
-//        // STRECH GOAL
-//        // 8. write to a file -> FileWriter
-//        File dittoFile = new File("./ditto.json");
-//        try(FileWriter pokeFileWriter = new FileWriter(dittoFile)){
-//            gson.toJson(pokemon, pokeFileWriter);
-//        } catch (IOException ioe) {
-//            ioe.printStackTrace();
-//        }
-//    }
+    private static void swansonQuoteWriter(String[] swQuote) throws IOException {
+        gson = new GsonBuilder().setPrettyPrinting().create();
+        Quotes newQuote = new Quotes("Ron Swanson",swQuote[0]);
+        String filePath = System.getProperty("user.dir") + "\\src" +
+                "\\main" +
+                "\\resources\\recentquotes.json";
+        File quotesFile = new File(filePath);
+        Reader reader = Files.newBufferedReader(Paths.get(filePath));
+        Quotes[] quotesArray = gson.fromJson(reader, Quotes[].class);
+        Quotes[] newQuotesArray = new Quotes[quotesArray.length + 1];
+        for(int i = 0; i < quotesArray.length; i++) {
+            newQuotesArray [i] = quotesArray[i];
+        }
+        newQuotesArray[quotesArray.length] = newQuote;
+        try(FileWriter quoteFileWriter = new FileWriter(quotesFile, Charset.forName("UTF8"))){
+            gson.toJson(newQuotesArray, quoteFileWriter);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
     private static String[] UrlReaderParser(HttpURLConnection con) throws IOException {
         gson = new GsonBuilder().setPrettyPrinting().create();
-        // 4. get inputstream from connection -> InputStreamReader
         InputStreamReader swQuoteInputStreamReader = new InputStreamReader(con.getInputStream());
-        // 5. Read the stream -> BufferedReader
         String swQuote = null;
         try (BufferedReader reader = new BufferedReader(swQuoteInputStreamReader)) {
-            // 6. readline() -> a line of data -> iterate??
             swQuote = reader.readLine();
-            System.out.println("Star Wars Quote: " + swQuote);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-        // 7. Parse data into a class -> Make a Pokemon class
         String[] quote = gson.fromJson(swQuote, String[].class);
         return quote;
     }
