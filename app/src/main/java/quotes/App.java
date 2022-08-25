@@ -4,9 +4,12 @@
 package quotes;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -16,16 +19,62 @@ public class App {
 
     public static void main(String[] args) throws IOException {
 
-        String filePath = System.getProperty("user.dir");
-        System.out.println(filePath);
-        if(args.length > 0) {
-            System.out.println(quoteByAuthor(filePath, args[0]));
-            System.out.println(quoteByWord(filePath, args[0]));
-        } else {
-            System.out.println(randomQuote(filePath));
-        }
+//        String filePath = System.getProperty("user.dir");
+//        System.out.println(filePath);
+//        if(args.length > 0) {
+//            System.out.println(quoteByAuthor(filePath, args[0]));
+//            System.out.println(quoteByWord(filePath, args[0]));
+//        } else {
+//            System.out.println(randomQuote(filePath));
+//        }
+
+        HttpURLConnection con = urlConnector();
+        StarWarsQuotes swQuote = UrlReaderParser(con);
+//        quoteWriter(swQuote);
 
     }
+
+    static Gson gson = null;
+    public String getGreeting() {
+        return "Hello World!";
+    }
+
+//    private static void quoteWriter(StarWarsQuotes swQuote) throws IOException {
+//        // STRECH GOAL
+//        // 8. write to a file -> FileWriter
+//        File dittoFile = new File("./ditto.json");
+//        try(FileWriter pokeFileWriter = new FileWriter(dittoFile)){
+//            gson.toJson(pokemon, pokeFileWriter);
+//        } catch (IOException ioe) {
+//            ioe.printStackTrace();
+//        }
+//    }
+
+    private static StarWarsQuotes UrlReaderParser(HttpURLConnection con) throws IOException {
+        gson = new GsonBuilder().setPrettyPrinting().create();
+        // 4. get inputstream from connection -> InputStreamReader
+        InputStreamReader swQuoteInputStreamReader = new InputStreamReader(con.getInputStream());
+        // 5. Read the stream -> BufferedReader
+        String swQuote = null;
+        try (BufferedReader reader = new BufferedReader(swQuoteInputStreamReader)) {
+            // 6. readline() -> a line of data -> iterate??
+            swQuote = reader.readLine();
+            System.out.println("Star Wars Quote: " + swQuote);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        // 7. Parse data into a class -> Make a Pokemon class
+        StarWarsQuotes quote = gson.fromJson(swQuote, StarWarsQuotes.class);
+        return quote;
+    }
+
+    public static HttpURLConnection urlConnector() throws MalformedURLException, IOException {
+        URL url = new URL("https://swquotesapi.digitaljedi.dk/api/SWQuote/RandomStarWarsQuote");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        return connection;
+    }
+
     public static String randomQuote(String filePath) throws IOException {
         Reader reader = Files.newBufferedReader(Paths.get(filePath + "\\src" +
                 "\\main" +
