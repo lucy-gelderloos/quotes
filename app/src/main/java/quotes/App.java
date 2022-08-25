@@ -29,7 +29,7 @@ public class App {
 //        }
 
         HttpURLConnection con = urlConnector();
-        StarWarsQuotes swQuote = UrlReaderParser(con);
+        String[] swQuote = UrlReaderParser(con);
 //        quoteWriter(swQuote);
 
     }
@@ -50,7 +50,7 @@ public class App {
 //        }
 //    }
 
-    private static StarWarsQuotes UrlReaderParser(HttpURLConnection con) throws IOException {
+    private static String[] UrlReaderParser(HttpURLConnection con) throws IOException {
         gson = new GsonBuilder().setPrettyPrinting().create();
         // 4. get inputstream from connection -> InputStreamReader
         InputStreamReader swQuoteInputStreamReader = new InputStreamReader(con.getInputStream());
@@ -64,12 +64,12 @@ public class App {
             ioException.printStackTrace();
         }
         // 7. Parse data into a class -> Make a Pokemon class
-        StarWarsQuotes quote = gson.fromJson(swQuote, StarWarsQuotes.class);
+        String[] quote = gson.fromJson(swQuote, String[].class);
         return quote;
     }
 
     public static HttpURLConnection urlConnector() throws MalformedURLException, IOException {
-        URL url = new URL("https://swquotesapi.digitaljedi.dk/api/SWQuote/RandomStarWarsQuote");
+        URL url = new URL("http://ron-swanson-quotes.herokuapp.com/v2/quotes");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         return connection;
